@@ -1,6 +1,6 @@
 import { FSM } from "./FSM";
 import * as transfo from "./transfo";
-import {drag, getMatrixFromElement, getPoint} from "./transfo";
+import {drag, getMatrixFromElement, getPoint, rotozoom} from "./transfo";
 
 function multiTouch(element: HTMLElement) : void {
     let pointerId_1 : number, Pt1_coord_element : SVGPoint, Pt1_coord_parent : SVGPoint,
@@ -65,7 +65,11 @@ function multiTouch(element: HTMLElement) : void {
                 eventName: ["touchstart"],
                 useCapture: false,
                 action: (evt : TouchEvent) : boolean => {
-                    // To be completed
+                    pointerId_1 =0;
+                    let touch2 = evt.changedTouches[1];
+                    Pt2_coord_parent = getPoint(touch2.pageX,touch2.pageY);
+                    originalMatrix = getMatrixFromElement(element);
+                    Pt2_coord_element = Pt2_coord_parent.matrixTransform(originalMatrix.inverse());
                     return true;
                 }
             },
@@ -76,7 +80,11 @@ function multiTouch(element: HTMLElement) : void {
                 action: (evt : TouchEvent) : boolean => {
                     evt.preventDefault();
                     evt.stopPropagation();
-                    // To be completed
+                    let touch1 = evt.changedTouches[0];
+                    let touch2 = evt.changedTouches[1];
+                    Pt1_coord_parent = getPoint(touch1.pageX, touch1.pageY);
+                    Pt2_coord_parent = getPoint(touch2.pageX, touch2.pageY);
+                    rotozoom(element, originalMatrix, Pt1_coord_element, Pt1_coord_parent, Pt2_coord_element, Pt2_coord_parent);
                     return true;
                 }
             },
