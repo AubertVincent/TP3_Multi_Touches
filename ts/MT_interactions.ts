@@ -27,7 +27,6 @@ function multiTouch(element: HTMLElement) : void {
                 action: (evt : TouchEvent) : boolean => {
                     pointerId_1 =0;
                     let touch1 = evt.changedTouches[0];
-                    //console.log(element.offsetLeft);
                     Pt1_coord_parent = getPoint(touch1.pageX,touch1.pageY);
                     originalMatrix = getMatrixFromElement(element);
                     Pt1_coord_element = Pt1_coord_parent.matrixTransform(originalMatrix.inverse());
@@ -42,7 +41,6 @@ function multiTouch(element: HTMLElement) : void {
                 action: (evt : TouchEvent) : boolean => {
                     evt.preventDefault();
                     evt.stopPropagation();
-                    // To be completed
                     let touch1 = evt.changedTouches[0];
                     Pt1_coord_parent = Pt1_coord_parent = getPoint(touch1.pageX,touch1.pageY);
                     drag(element,originalMatrix,Pt1_coord_element,Pt1_coord_parent);
@@ -65,8 +63,8 @@ function multiTouch(element: HTMLElement) : void {
                 eventName: ["touchstart"],
                 useCapture: false,
                 action: (evt : TouchEvent) : boolean => {
-                    pointerId_1 =0;
-                    let touch2 = evt.changedTouches[1];
+                    pointerId_2 =1;
+                    let touch2 = evt.changedTouches[0];
                     Pt2_coord_parent = getPoint(touch2.pageX,touch2.pageY);
                     originalMatrix = getMatrixFromElement(element);
                     Pt2_coord_element = Pt2_coord_parent.matrixTransform(originalMatrix.inverse());
@@ -80,10 +78,25 @@ function multiTouch(element: HTMLElement) : void {
                 action: (evt : TouchEvent) : boolean => {
                     evt.preventDefault();
                     evt.stopPropagation();
-                    let touch1 = evt.changedTouches[0];
-                    let touch2 = evt.changedTouches[1];
-                    Pt1_coord_parent = getPoint(touch1.pageX, touch1.pageY);
-                    Pt2_coord_parent = getPoint(touch2.pageX, touch2.pageY);
+                    console.log(evt.changedTouches);
+                    if(evt.changedTouches.length === 2) {
+                        let touch1 = evt.changedTouches[0];
+                        let touch2 = evt.changedTouches[1];
+                        if(touch1.identifier === pointerId_1) {
+                            Pt1_coord_parent = getPoint(touch1.pageX, touch1.pageY);
+                            Pt2_coord_parent = getPoint(touch2.pageX, touch2.pageY);
+                        }else if(touch1.identifier === pointerId_2) {
+                            Pt1_coord_parent = getPoint(touch2.pageX, touch2.pageY);
+                            Pt2_coord_parent = getPoint(touch1.pageX, touch1.pageY);
+                        }
+                    }else if (evt.changedTouches.length === 1) {
+                        let touch :Touch = evt.changedTouches[0];
+                        if(touch.identifier === pointerId_1) {
+                            Pt1_coord_parent = getPoint(touch.pageX, touch.pageY);
+                        }else if (touch.identifier === pointerId_2) {
+                            Pt2_coord_parent = getPoint(touch.pageX, touch.pageY);
+                        }
+                    }
                     rotozoom(element, originalMatrix, Pt1_coord_element, Pt1_coord_parent, Pt2_coord_element, Pt2_coord_parent);
                     return true;
                 }
@@ -94,8 +107,13 @@ function multiTouch(element: HTMLElement) : void {
                 eventName: ["touchend"],
                 useCapture: true,
                 action: (evt : TouchEvent) : boolean => {
-                    const touch = getRelevantDataFromEvent(evt);
-                    // To be completed
+                    console.log(evt.changedTouches[0]);
+                    let touch1 = evt.changedTouches[0];
+                    if(touch1.identifier === pointerId_1) {
+                        Pt1_coord_parent = Pt2_coord_parent;
+                        pointerId_1 = pointerId_2;
+                    }
+                    Pt1_coord_element = Pt1_coord_parent.matrixTransform(originalMatrix.inverse());
                     return true;
                 }
             }
